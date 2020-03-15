@@ -19,7 +19,8 @@ async def tcp_client(data_in, loop):
 #loop = asyncio.get_event_loop()
 
 def read_file():  # 輸入檔案路徑，將檔案存入記憶體，返回位元組數組
-    filename = input('copy your file uri here: ')
+    filename: str = input('copy your file uri here: ')
+    filename = filename.replace('\"','',2)
     try:
         file_handle = open(filename, 'br')
     except Exception as esu:  # 嘗試二進位打開檔案
