@@ -14,12 +14,12 @@ async def calc_size(request):
         print(part.headers)
         if part.headers[aiohttp.hdrs.CONTENT_TYPE] == 'binary':
             print('file found!')
-            await asyncio.sleep(6)
+            await asyncio.sleep(3)
             binary = await part.read()
     if binary is not None:
         print(len(binary))
 
-    return web.Response(text='Parse success, the size is '+str(len(binary)))
+    return web.Response(text='接收資料成功，資料大小 '+str(len(binary)))
 
 
 async def web_page(request):

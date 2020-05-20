@@ -1,20 +1,20 @@
 import aiohttp
 import asyncio
 
+ip_addr = "127.0.0.1"
+remote_port = "8086"
+mp_url_path = "/mp"
+full_url = "http://" + ip_addr + ":" + remote_port + mp_url_path
 
-# async def fetch(session, url):
-#     async with session.get(url) as response:
-#         return await response.text()
 
-
-async def main(data):
+async def request_http(data):
     async with aiohttp.ClientSession() as session:
         with aiohttp.MultipartWriter() as mpwriter:
             part = mpwriter.append(data)
             # part.set_content_disposition('binary')
             part.headers[aiohttp.hdrs.CONTENT_TYPE] = 'binary'
             mpwriter.append("the local size is " + str(len(data)))
-            async with session.post('http://localhost:8086/mp', data=mpwriter) as resp:
+            async with session.post(full_url, data=mpwriter) as resp:
                 print('HTTP code is ', resp.status)
                 print(await resp.text())
 
@@ -37,4 +37,4 @@ if __name__ == '__main__':
     data = read_file()
     # print(len(data))
     loop = asyncio.get_event_loop()
-    loop.run_until_complete(main(data))
+    loop.run_until_complete(request_http(data))
