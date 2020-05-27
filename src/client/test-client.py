@@ -32,11 +32,11 @@ async def request_http(data):
 
 
 def make_query():  # return String
-    query = {"type": ""}
+    query = {"type": "controlled"}
     obj = {}
     obj.update({"time": str(int(time.time()*1000)),
-                "from": "W9O0D3qR", # 這裏填上本機 ID
-                "to": "",  # input("input the target"),
+                "from": "46168119", # 這裏填上本機 ID
+                "to": "15464342",  # input("input the target"),
                 "action": input("input the action "),
                 "query": query})
     return json.dumps(obj)  # dumps 將 字典 dict 轉換爲 json 字串 string

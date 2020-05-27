@@ -26,7 +26,7 @@ async def request_http(data):
                 print("收取結果中，，，")
                 code = resp.status
                 result = await resp.text()
-                return code, result
+                print(code, result)
 
 
 def make_query():  # return String
@@ -40,9 +40,15 @@ def make_query():  # return String
     return json.dumps(obj)
 
 
+loop = asyncio.get_event_loop()
+
+
 if __name__ == '__main__':
     query = make_query()
-    code, result = asyncio.run(request_http(query))
-    print(code, result)
+    # code, result = asyncio.run(request_http(query))
+    # loop.create_task(request_http(query))
+    loop.run_until_complete(request_http(query))
+
+    # print(code, result)
     # 0001 被控
     # 0002 遙控
