@@ -38,7 +38,7 @@ async def json_str_parser(json_str):
             # print(the_json)
             if the_action == "request":
                 mResponse = await for_request(the_json)
-            elif the_action == "command":
+            elif the_action == "command" or the_action == "error":
                 mResponse = await for_command(the_json)
             elif the_action == "register":
                 mResponse = await for_register(the_json)
