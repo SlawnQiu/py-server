@@ -1,10 +1,16 @@
-import asyncio, time, string, random
+import asyncio, time, string, random, logging
 import json
 from aiohttp import web
 import logging
 
+
+logging.basicConfig(level=logging.INFO,
+                    format='%(asctime)s %(levelname)s %(message)s',
+                    datefmt='%Y-%m-%d %H:%M:%S'
+                    )
+
 queue_dict = {}  # usage: "ID": the Queue
-registerd_dict = {}  # usage "ID": "controller or controlled"
+registerd_dict = {}  # usage "ID": {"type": "controller or controlled", "time": time}
 
 
 async def for_request(query_dict):
@@ -23,21 +29,21 @@ async def for_request(query_dict):
     if query_dict["from"] not in queue_dict:
         q = asyncio.Queue()
         queue_dict.update({query_dict["from"]: q})
-        print("no queue called " + query_dict["from"])
+        logging.debug("no queue called " + query_dict["from"])
     else:
         q = queue_dict[query_dict["from"]]
-        print("there is a queue called " + query_dict["from"])
+        logging.debug("there is a queue called " + query_dict["from"])
 
     while True:
         if q.empty():
             await asyncio.sleep(0.01)
         else:
             break
-    print("there are something in the queue ")
+    logging.debug("there are something in the queue ")
 
     message = q.get_nowait()
 
-    print(message)
+    # print(message)
     return web.Response(status=200, text=json.dumps(message))
 
 
@@ -55,10 +61,10 @@ async def for_command(query_dict):
     if query_dict["to"] not in queue_dict:
         q = asyncio.Queue()
         queue_dict.update({query_dict["to"]: q})
-        print("no queue called " + query_dict["to"])
+        logging.debug("no queue called " + query_dict["to"])
     else:
         q = queue_dict[query_dict["to"]]
-        print("there is a queue called " + query_dict["to"])
+        logging.debug("there is a queue called " + query_dict["to"])
 
     await q.put(query_dict)
     resptext = make_response_json("response", query_type="command_created", origin="server")
@@ -68,7 +74,6 @@ async def for_command(query_dict):
 async def for_register(query_dict):
     try:
         the_type = query_dict["query"]["type"]
-        print(the_type)
         type_dict = {
             "controller": "controller",
             "controlled": "controlled"
@@ -82,6 +87,7 @@ async def for_register(query_dict):
     chars = string.digits
     the_id = ''.join([random.choice(chars) for _ in range(8)])
     registerd_dict.update({the_id: the_type})
+    logging.info("The device " + the_id + " registered as " + the_type)
     resptext = make_response_json("response", query_type="id_delegation", origin="server", query_list=[the_id])
     return web.Response(status=200, text=resptext)
 

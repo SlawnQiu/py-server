@@ -1,9 +1,15 @@
 import asyncio
 import json
+import logging
 
 import aiohttp
 from aiohttp import web
 from action_handler import for_request, for_command, for_register, make_response_json
+
+logging.basicConfig(level=logging.INFO,
+                    format='%(asctime)s %(levelname)s %(message)s',
+                    datefmt='%Y-%m-%d %H:%M:%S'
+                    )
 
 
 async def the_mp_server(request):
@@ -25,7 +31,7 @@ async def the_mp_server(request):
 
 async def the_json_server(request):
     json_str = await request.text()
-    print("new connection " + json_str)
+    logging.info("New Request" + json_str)
     return await json_str_parser(json_str)
 
 
