@@ -61,8 +61,8 @@ async def for_command(query_dict):
         print("there is a queue called " + query_dict["to"])
 
     await q.put(query_dict)
-
-    return web.Response(status=201, text="command created")
+    resptext = make_response_json("response", query_type="command_created", origin="server")
+    return web.Response(status=201, text=resptext)
 
 
 async def for_register(query_dict):
@@ -79,7 +79,7 @@ async def for_register(query_dict):
         return web.Response(status=400, text=resptext)
     # request legal
 
-    chars = string.ascii_letters + string.digits
+    chars = string.digits
     the_id = ''.join([random.choice(chars) for _ in range(8)])
     registerd_dict.update({the_id: the_type})
     resptext = make_response_json("response", query_type="id_delegation", origin="server", query_list=[the_id])
@@ -121,7 +121,7 @@ def make_response_json(action, origin=None, destination=None, query_type=None, q
 def response_registered_peer():
     device_list = []
     for deviceid in registerd_dict:
-        if registerd_dict[deviceid] == "controlled":
+        if registerd_dict[deviceid] == "controlled" or registerd_dict[deviceid] == "controller":
             device_list.append(registerd_dict[deviceid])
             device_list.append(deviceid)
     resptext = make_response_json("response", query_type="peer_found", query_list=device_list)
