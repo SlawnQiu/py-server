@@ -154,11 +154,11 @@ async def light_detector_task():
 async def bluetooth_task():
     global BRIGHTNESS
     while True:
-        if POWER_ON:
+        if True:
             count = ser.inWaiting()
             if count != 0:
                 recv = ser.read(count)
-                # TODO: 字符串怎麼讀出來？
+
                 logging.info("Bluetooth recv: " + str(recv))
                 try:
                     mdict = json.loads(recv)
