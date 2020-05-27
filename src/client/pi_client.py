@@ -13,7 +13,7 @@ import logging
 from pi_client_json_maker import make_json
 
 # 日誌記錄級別
-logging.basicConfig(level=logging.DEBUG,
+logging.basicConfig(level=logging.INFO,
                     format='%(asctime)s %(levelname)s %(message)s',
                     datefmt='%Y-%m-%d %H:%M:%S'
                     )
@@ -160,10 +160,16 @@ async def bluetooth_task():
                 recv = ser.read(count)
                 # TODO: 字符串怎麼讀出來？
                 logging.info("Bluetooth recv: " + str(recv))
-                if recv == b'31':
-                    BRIGHTNESS = 4
-                else:
-                    BRIGHTNESS = 0
+                try:
+                    mdict = json.loads(recv)
+                    if mdict["action"] == "command":
+                        query = mdict["query"]
+                        command_executor(query)
+                    else:
+                        logging.error("Json is not a command")
+                except Exception as err:
+                    logging.error("Json 不正確，錯誤：" + str(err))
+
         else:
             pass
 
@@ -312,6 +318,7 @@ def command_executor(command_query):
             continue
         query_list.append(command_query[onekey])
 
+    logging.info("The command is " + command_type)
     if command_type == "POWER_ON":
         POWER_ON = True
 
