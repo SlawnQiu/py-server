@@ -3,7 +3,6 @@ import json
 from aiohttp import web
 import logging
 
-
 logging.basicConfig(level=logging.INFO,
                     format='%(asctime)s %(levelname)s %(message)s',
                     datefmt='%Y-%m-%d %H:%M:%S'
@@ -86,7 +85,9 @@ async def for_register(query_dict):
 
     chars = string.digits
     the_id = ''.join([random.choice(chars) for _ in range(8)])
-    registerd_dict.update({the_id: the_type})
+
+    registerd_dict.update({the_id: {"type": the_type, "time": str(int(time.time()))}})
+
     logging.info("The device " + the_id + " registered as " + the_type)
     resptext = make_response_json("response", query_type="id_delegation", origin="server", query_list=[the_id])
     return web.Response(status=200, text=resptext)
@@ -96,6 +97,8 @@ def if_id_registered(ids):
     for the_id in ids:
         if the_id not in registerd_dict:
             raise ValueError("no registered id of " + str(the_id))
+        else:
+            registerd_dict[the_id]["time"] = str(int(time.time()))
 
 
 def make_response_json(action, origin=None, destination=None, query_type=None, query_list=None):
@@ -127,8 +130,10 @@ def make_response_json(action, origin=None, destination=None, query_type=None, q
 def response_registered_peer():
     device_list = []
     for deviceid in registerd_dict:
-        if registerd_dict[deviceid] == "controlled" or registerd_dict[deviceid] == "controller":
-            device_list.append(registerd_dict[deviceid])
+        if registerd_dict[deviceid]["type"] == "controlled" or registerd_dict[deviceid]["type"] == "controller":
+            if int(time.time()) - int(registerd_dict[deviceid]["time"]) > 200:
+                continue  # 如果 200 秒不活躍，不再包括在返回的 peer 列表裏
+            device_list.append(registerd_dict[deviceid]["type"])
             device_list.append(deviceid)
     resptext = make_response_json("response", query_type="peer_found", query_list=device_list)
     return web.Response(status=200, text=resptext)
