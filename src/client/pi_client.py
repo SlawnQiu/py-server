@@ -38,10 +38,15 @@ GPIO.setup(13, GPIO.OUT)
 GPIO.setup(15, GPIO.OUT)
 GPIO.setup(40, GPIO.IN, pull_up_down=GPIO.PUD_UP)
 
-ser = serial.Serial("/dev/rfcomm0", 9600, timeout=0.5)
-ser.write("test ".encode())
+ser = serial.Serial()
+ser.setPort("/dev/rfcomm0")
+ser.baudrate(9600)
+ser.timeout(0.5)
 
-bus = smbus.SMBus(1)
+# ser.write("test ".encode())
+
+
+bus = smbus.SMBus(1)  # 亮度感應器
 
 # 控制用變數
 POWER_ON = False
@@ -50,7 +55,7 @@ BRIGHTNESS = 4
 LED_GPIO_INDEX = [11, 16, 13, 15]
 TOUCH_SWITCH_GPIO = 40
 TOUCH_LONG_THRESHOLD_MILISEC = 1500  # 觸控板長按時間閾值
-LIGHT_DETECT_INTERVAL_SEC = 5  # 亮度探測間隔
+LIGHT_DETECT_INTERVAL_SEC = 0.5  # 亮度探測間隔
 LOCAL_DEVICE_ID = None  # 本機的 ID，用八位數字表示
 HTTP_FAILED_COUNT = 0
 
@@ -153,12 +158,12 @@ async def light_detector_task():
 # 蓝牙通信操作
 async def bluetooth_task():
     global BRIGHTNESS
+    ser.open()
     while True:
-        if True:
-            count = ser.inWaiting()
+        try:
+            count = ser.in_waiting
             if count != 0:
                 recv = ser.read(count)
-
                 logging.info("Bluetooth recv: " + str(recv))
                 try:
                     mdict = json.loads(recv)
@@ -170,8 +175,12 @@ async def bluetooth_task():
                 except Exception as err:
                     logging.error("Json 不正確，錯誤：" + str(err))
 
-        else:
-            pass
+        except Exception as e:
+            logging.error("Serial Port error: " + str(e))
+            ser.close()
+            await asyncio.sleep(1)
+            ser.open()
+            continue
 
         await asyncio.sleep(0.05)
 
